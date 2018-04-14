@@ -114,17 +114,22 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
     val name = s"Compiling compiler-bridge for ${installation.version.unparse}"
     val monitor = SubMonitor.convert(pm, name, 2)
     monitor.subTask(name)
-
-    (compilerBridgeSrc(installation.version), zincFullJar) match {
+    val compilerBridgeSource = getCompilerBridgeSources(installation)
+    //val zincJar = getZincJar(installation)
+    (compilerBridgeSource, zincFullJar) match {
       case (Some(compilerBridge), Some(zincInterface)) =>
         val log = new SbtLogger
         cacheDir(installation).toFile.mkdirs()
         val targetJar = bridgeJar(installation)
         monitor.worked(1)
-
+        val sourceJars = scala.collection.mutable.MutableList(compilerBridge.toFile())
+        
+        if (installation.version.unparse.contains("hydra"))
+          sourceJars :+ installation.extraJars
+          
         val label = installation.version.unparse
         val raw = new RawCompiler(scalaInstanceForInstallation(installation), ClasspathOptionsUtil.auto, log)
-        AnalyzingCompiler.compileSources(List(compilerBridge.toFile), targetJar.toFile, List(zincInterface.toFile), label, raw, log)
+        AnalyzingCompiler.compileSources(sourceJars, targetJar.toFile, List(zincInterface.toFile), label, raw, log)
 
         monitor.worked(1)
 
@@ -139,6 +144,20 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
     }
   }
 
+  private def getCompilerBridgeSources(scalaInstallation: IScalaInstallation) = synchronized {
+    scalaInstallation.extraJars.find(module => module.classJar.toString().contains("hydra-bridge")) match {
+      case Some(bridgeSource) => Some(bridgeSource.classJar)
+      case None => compilerBridgeSrc(scalaInstallation.version)
+    }
+  }
+  
+//  private def getZincJar(scalaInstallation: IScalaInstallation) = synchronized {
+//    scalaInstallation.extraJars.find(module => module.classJar.toString().contains("zinc")) match {
+//      case Some(zincJar) => Some(zincJar.classJar)
+//      case None => zincFullJar
+//    }
+//  }
+  
   private class SbtLogger extends Logger {
     private val errors = ListBuffer[String]()
 

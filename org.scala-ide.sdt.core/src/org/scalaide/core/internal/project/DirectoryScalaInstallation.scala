@@ -25,6 +25,14 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   final val scalaReflectPrefix = "scala-reflect"
   final val scalaCompilerPrefix = "scala-compiler"
   final val scalaSwingPrefix = "scala-swing"
+  final val hydraPrefix = "hydra_"
+  final val hydraBridgePrefix = "hydra-bridge_1_0"
+  final val scalaLoggingPrefix = "scala-logging_"
+  final val scalaTestPrefix = "scalatest_"
+  final val logbackClassicPrefix = "logback-classic"
+  final val logbackCorePrefix = "logback-core"
+  final val zincTriplequotePrefix = "zinc"
+  final val slf4jPrefix = "slf4j-api-"
 
   private val dirAsValidFile: Option[File] = {
     val f = directory.toFile()
@@ -69,8 +77,9 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   private def findScalaJars(prefixes: List[String], presumedVersion: Option[String]): List[ScalaModule] = {
     presumedVersion foreach { s => require(""".2\.\d+(?:\.\d*)?(?:-.*)?""".r.pattern.matcher(s).matches) }
     // for now this means we return whatever we could find: it may not be enough (missing scala-reflect, etc)
+    
     prefixes flatMap { p =>
-      val optionalVersion = """(?:.2\.\d+(?:\.\d*)?(?:-.*)?)?"""
+      val optionalVersion = """(?:.?\d\.\d+(?:\.\d*)?(?:-.*)?)?"""
       val requiredVersion = presumedVersion.fold(optionalVersion)(s => s.replaceAll("""\.""", """\\."""))
       val versionedString = s"$p$requiredVersion\\.jar"
       val versionedRegex = versionedString.r
@@ -113,7 +122,9 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   if (versionCandidate.isDefined && versionCandidate.get < ScalaVersion("2.10.0")) throw new IllegalArgumentException("This Scala version is too old for the presentation compiler to use. Please provide a 2.10 scala (or later).")
 
   override lazy val extraJars = findScalaJars(List(scalaReflectPrefix,
-      scalaSwingPrefix), presumedLibraryVersionString).filter {
+      scalaSwingPrefix, hydraPrefix, hydraBridgePrefix, scalaLoggingPrefix,
+      scalaTestPrefix, logbackClassicPrefix, logbackCorePrefix,
+      zincTriplequotePrefix, slf4jPrefix), presumedLibraryVersionString).filter {
     module => versionCandidate forall (looksBinaryCompatible(_, module))
     }
   override lazy val compiler = compilerCandidate.get
