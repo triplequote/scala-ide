@@ -42,9 +42,15 @@ class CachingCompiler private (cacheFile: File, sbtReporter: Reporter, log: Logg
       .map {
         case (a, s) => (Option(a), Option(s))
       }.getOrElse((Option(SbtUtils.readAnalysis(cacheFile)), None))
-    cacheAndReturnLastAnalysis(new IncrementalCompilerImpl().compile(comps.scalac, comps.javac, in.sources, in.classpath, in.output, in.cache,
-      in.scalacOptions, in.javacOptions, o2jo(previousAnalysis), o2jo(previousSetup), lookup, sbtReporter, in.order,
-      skip = false, in.progress, in.incOptions, extra = Array(), log))
+      
+    if (!in.scalaInstallation.version.unparse.contains("hydra"))
+      cacheAndReturnLastAnalysis(new IncrementalCompilerImpl().compile(comps.scalac, comps.javac, in.sources, in.classpath, in.output, in.cache,
+        in.scalacOptions, in.javacOptions, o2jo(previousAnalysis), o2jo(previousSetup), lookup, sbtReporter, in.order,
+        skip = false, in.progress, in.incOptions, extra = Array(), log))
+    else
+      cacheAndReturnLastAnalysis(new sbt.internal.inc.hydra.IncrementalCompilerImpl().compile(comps.scalac, comps.javac, in.sources, in.classpath, in.output, in.cache,
+        in.scalacOptions, in.javacOptions, o2jo(previousAnalysis), o2jo(previousSetup), lookup, sbtReporter, in.order,
+        skip = false, in.progress, in.incOptions, extra = Array(), log))
   }
 
   private def cacheAndReturnLastAnalysis(compilationResult: CompileResult): Analysis = {
