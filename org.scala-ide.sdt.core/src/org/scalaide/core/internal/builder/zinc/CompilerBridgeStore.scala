@@ -123,10 +123,10 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
         val targetJar = bridgeJar(installation)
         monitor.worked(1)
         val sourceJars = scala.collection.mutable.MutableList(compilerBridge.toFile())
-        
+
         if (installation.version.unparse.contains("hydra"))
           sourceJars :+ installation.extraJars
-          
+
         val label = installation.version.unparse
         val raw = new RawCompiler(scalaInstanceForInstallation(installation), ClasspathOptionsUtil.auto, log)
         AnalyzingCompiler.compileSources(sourceJars, targetJar.toFile, List(zincInterface.toFile), label, raw, log)
@@ -150,14 +150,14 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
       case None => compilerBridgeSrc(scalaInstallation.version)
     }
   }
-  
+
 //  private def getZincJar(scalaInstallation: IScalaInstallation) = synchronized {
 //    scalaInstallation.extraJars.find(module => module.classJar.toString().contains("zinc")) match {
 //      case Some(zincJar) => Some(zincJar.classJar)
 //      case None => zincFullJar
 //    }
 //  }
-  
+
   private class SbtLogger extends Logger {
     private val errors = ListBuffer[String]()
 

@@ -5,6 +5,7 @@ import scala.tools.nsc.Settings
 object IDESettings {
 
   import ScalaPluginSettings._
+  import HydraSettings._
   case class Box(name: String, userSettings: List[Settings#Setting])
 
   def shownSettings(s : Settings) : List[Box] = {
@@ -34,6 +35,10 @@ object IDESettings {
         withVersionClasspathValidator,
         recompileOnMacroDef,
         useScopesCompiler)))
+
+  def hydraSettings: List[Box] =
+    List(Box("Hydra Compiler Settings", List(sourcePartitioner, partitionFile, hydraStore, cpus)))
+
 }
 
 object ScalaPluginSettings extends Settings {
@@ -81,5 +86,21 @@ object ScalaPluginSettings extends Settings {
     val s = BooleanSetting(b.name, b.helpDescription)
     if (v) s.tryToSet(Nil)
     s
+  }
+}
+
+object HydraSettings extends Settings {
+  val sourcePartitioner = ChoiceSetting("-sourcePartitioner", "which", "Source Partitioner",
+      List("auto", "explicit", "plain", "package"), "auto")
+  val partitionFile = StringSetting("-partitionFile", "", "Partition File path will be appended to the project root directory.", "")
+  val hydraStore = StringSetting("-hydraStore", "", "Hydra Store path will be appended to the project root directory.", "")
+  val cpus = IntSetting("-cpus", "Number of workers to use for compiling a project's Scala sources.", Math.max(1, Runtime.getRuntime().availableProcessors() / 2), Some((1, 100)), toInt)
+
+  def toInt(s: String): Option[Int] = {
+    try {
+      Some(s.toInt)
+    } catch {
+      case e: Exception => None
+    }
   }
 }
