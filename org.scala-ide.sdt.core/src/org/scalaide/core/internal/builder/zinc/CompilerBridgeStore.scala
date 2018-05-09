@@ -115,7 +115,6 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
     val monitor = SubMonitor.convert(pm, name, 2)
     monitor.subTask(name)
     val compilerBridgeSource = getCompilerBridgeSources(installation)
-    //val zincJar = getZincJar(installation)
     (compilerBridgeSource, zincFullJar) match {
       case (Some(compilerBridge), Some(zincInterface)) =>
         val log = new SbtLogger
@@ -150,13 +149,6 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
       case None => compilerBridgeSrc(scalaInstallation.version)
     }
   }
-
-//  private def getZincJar(scalaInstallation: IScalaInstallation) = synchronized {
-//    scalaInstallation.extraJars.find(module => module.classJar.toString().contains("zinc")) match {
-//      case Some(zincJar) => Some(zincJar.classJar)
-//      case None => zincFullJar
-//    }
-//  }
 
   private class SbtLogger extends Logger {
     private val errors = ListBuffer[String]()
