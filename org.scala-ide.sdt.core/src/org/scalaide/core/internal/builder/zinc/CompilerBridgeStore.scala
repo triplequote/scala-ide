@@ -124,7 +124,7 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
         monitor.worked(1)
         val sourceJars = scala.collection.mutable.MutableList(compilerBridge.toFile())
 
-        if (installation.version.unparse.contains("hydra"))
+        if (installation.isHydraInstallation)
           sourceJars :+ installation.extraJars
 
         val label = installation.version.unparse

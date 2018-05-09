@@ -43,7 +43,7 @@ class CachingCompiler private (cacheFile: File, sbtReporter: Reporter, log: Logg
         case (a, s) => (Option(a), Option(s))
       }.getOrElse((Option(SbtUtils.readAnalysis(cacheFile)), None))
       
-    if (!in.scalaInstallation.version.unparse.contains("hydra"))
+    if (!in.scalaInstallation.isHydraInstallation)
       cacheAndReturnLastAnalysis(new IncrementalCompilerImpl().compile(comps.scalac, comps.javac, in.sources, in.classpath, in.output, in.cache,
         in.scalacOptions, in.javacOptions, o2jo(previousAnalysis), o2jo(previousSetup), lookup, sbtReporter, in.order,
         skip = false, in.progress, in.incOptions, extra = Array(), log))

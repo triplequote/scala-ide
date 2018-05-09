@@ -29,13 +29,11 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   final val hydraReflectPrefix = "com.triplequote.scala-reflect"
   final val hydraCompilerPrefix = "com.triplequote.scala-compiler"
   final val hydraPrefix = "com.triplequote.hydra"
-  final val hydraBridgePrefix = "hydra-bridge_1_0"
+  final val hydraBridgePrefix = "com.triplequote.hydra-bridge_1_0"
   final val scalaLoggingPrefix = "com.typesafe.scala-logging.scala-logging_"
-  final val scalaTestPrefix = "scalatest_"
   final val scalaXmlPrefix = "org.scala-lang.modules.scala-xml_"
   final val logbackClassicPrefix = "ch.qos.logback.logback-classic"
   final val logbackCorePrefix = "ch.qos.logback.logback-core"
-  final val zincTriplequotePrefix = "zinc"
   final val slf4jPrefix = "org.slf4j.slf4j-api"
 
   private val dirAsValidFile: Option[File] = {
@@ -127,13 +125,14 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
 
   override lazy val extraJars = findScalaJars(List(scalaReflectPrefix,
       scalaSwingPrefix, hydraPrefix, hydraBridgePrefix, scalaLoggingPrefix,
-      scalaTestPrefix, logbackClassicPrefix, logbackCorePrefix,
-      zincTriplequotePrefix, slf4jPrefix, hydraReflectPrefix, scalaXmlPrefix), presumedLibraryVersionString).filter {
+      logbackClassicPrefix, logbackCorePrefix, slf4jPrefix, 
+      hydraReflectPrefix, scalaXmlPrefix), presumedLibraryVersionString).filter {
     module => versionCandidate forall (looksBinaryCompatible(_, module))
     }
   override lazy val compiler = compilerCandidate.get
   override lazy val library = libraryCandidate.get
   override lazy val version = versionCandidate.get
+  override lazy val isHydraInstallation = version.unparse.contains("hydra")
 
 }
 

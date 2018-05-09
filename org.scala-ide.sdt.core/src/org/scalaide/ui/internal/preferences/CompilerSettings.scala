@@ -152,7 +152,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
   import EclipseSetting.toEclipseBox
 
   /** Hydra Settings */
-  lazy val hydraScalaInstallations = ScalaInstallation.availableInstallations.filter(installation => installation.version.unparse.contains("hydra"))
+  lazy val hydraScalaInstallations = ScalaInstallation.availableInstallations.filter(installation => installation.isHydraInstallation)
   lazy val hydraBoxes = if (hydraScalaInstallations.nonEmpty) IDESettings.hydraSettings else List.empty
 
   /** The settings we can change */

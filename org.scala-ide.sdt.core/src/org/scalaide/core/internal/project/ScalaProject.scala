@@ -440,7 +440,7 @@ class ScalaProject private(val underlying: IProject) extends ClasspathManagement
     import org.scalaide.util.internal.SettingConverterUtil.convertNameToProperty
     val hydraArguments = scala.collection.mutable.ArrayBuffer.empty[String]
 
-    if (effectiveScalaInstallation().version.unparse.contains("hydra")) {
+    if (effectiveScalaInstallation().isHydraInstallation) {
       val hydraStoreUserSetting = storage.getString(convertNameToProperty(HydraSettings.hydraStore.name))
       val cpusUserSetting = storage.getString(convertNameToProperty(HydraSettings.cpus.name))
       val partitionFileUserSetting = storage.getString(convertNameToProperty(HydraSettings.partitionFile.name))
