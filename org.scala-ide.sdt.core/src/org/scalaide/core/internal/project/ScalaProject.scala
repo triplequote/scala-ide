@@ -452,7 +452,7 @@ class ScalaProject private(val underlying: IProject) extends ClasspathManagement
           else
             Paths.get(rootProjectDir, hydraStoreUserSetting).toString()
 
-      val sourcepath = allSourceFiles.mkString(",")
+      val sourcepath = sourceFolders.map(_.toOSString).mkString(pathSeparator)
       val timingsFile = Paths.get(hydraStore, "timings.csv").toString()
 
       val partitionFile = if (partitionFileUserSetting.isEmpty())

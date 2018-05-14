@@ -17,6 +17,9 @@ import xsbti.compile.CompileOrder.Mixed
 import xsbti.compile.{ ClasspathOptions => XClasspathOptions, JavaTools => XJavaTools, _ }
 import sbt.internal.inc.CompileOutput
 
+/**
+ * Copied the file from https://github.com/triplequote/hydra repository (v0.10.0 tag)
+ */
 class IncrementalCompilerImpl extends IncrementalCompiler {
   /**
    * Performs an incremental compilation based on [[xsbti.compile.Inputs]].

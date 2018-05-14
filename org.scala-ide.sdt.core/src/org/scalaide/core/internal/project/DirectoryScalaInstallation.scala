@@ -132,7 +132,6 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   override lazy val compiler = compilerCandidate.get
   override lazy val library = libraryCandidate.get
   override lazy val version = versionCandidate.get
-  override lazy val isHydraInstallation = version.unparse.contains("hydra")
 
 }
 

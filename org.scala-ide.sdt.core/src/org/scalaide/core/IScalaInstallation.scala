@@ -59,7 +59,7 @@ trait IScalaInstallation {
   /**
    * Returns if the project should be compiled with Hydra Compiler
    */
-  def isHydraInstallation: Boolean = false
+  def isHydraInstallation: Boolean = version.unparse.contains("hydra")
 }
 
 

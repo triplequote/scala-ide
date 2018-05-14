@@ -17,6 +17,9 @@ import sbt.internal.inc.Lookup
 import sbt.internal.inc.ClassFileManager
 import sbt.internal.inc.Analysis
 
+/**
+ * Copied the file from https://github.com/triplequote/hydra repository (v0.10.0 tag)
+ */
 object Incremental {
   class PrefixingLogger(val prefix: String)(orig: Logger) extends Logger {
     def trace(t: => Throwable): Unit = orig.trace(t)
