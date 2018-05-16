@@ -25,6 +25,8 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   final val scalaReflectPrefix = "scala-reflect"
   final val scalaCompilerPrefix = "scala-compiler"
   final val scalaSwingPrefix = "scala-swing"
+  
+  //Hydra specific jars
   final val hydraScalaLibraryPrefix = "com.triplequote.scala-library"
   final val hydraReflectPrefix = "com.triplequote.scala-reflect"
   final val hydraCompilerPrefix = "com.triplequote.scala-compiler"
@@ -35,6 +37,9 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   final val logbackClassicPrefix = "ch.qos.logback.logback-classic"
   final val logbackCorePrefix = "ch.qos.logback.logback-core"
   final val slf4jPrefix = "org.slf4j.slf4j-api"
+  final val license4jPrefix = "com.license4j.license4j-runtime-library"
+  final val hydraDashboardPrefix = "com.triplequote.dashboard-model_"
+  final val hydraLicenseCheckingPrefix = "com.triplequote.license-checking"
 
   private val dirAsValidFile: Option[File] = {
     val f = directory.toFile()
@@ -122,11 +127,15 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   if (!versionCandidate.isDefined) throw new IllegalArgumentException("The Scala library jar in this directory has incorrect or missing version information, aborting.")
   // TODO : this hard-coded hook will need changing
   if (versionCandidate.isDefined && versionCandidate.get < ScalaVersion("2.10.0")) throw new IllegalArgumentException("This Scala version is too old for the presentation compiler to use. Please provide a 2.10 scala (or later).")
-
+  // Hydra initialization checks
+  if (extraJars.filter(module => module.classJar.toFile().getName.contains(hydraBridgePrefix)).isEmpty) 
+    throw new IllegalArgumentException("Can not recognize a valid Hydra Bridge jar in this directory.")
+  
   override lazy val extraJars = findScalaJars(List(scalaReflectPrefix,
       scalaSwingPrefix, hydraPrefix, hydraBridgePrefix, scalaLoggingPrefix,
       logbackClassicPrefix, logbackCorePrefix, slf4jPrefix, 
-      hydraReflectPrefix, scalaXmlPrefix), presumedLibraryVersionString).filter {
+      hydraReflectPrefix, scalaXmlPrefix, license4jPrefix,
+      hydraDashboardPrefix, hydraLicenseCheckingPrefix), presumedLibraryVersionString).filter {
     module => versionCandidate forall (looksBinaryCompatible(_, module))
     }
   override lazy val compiler = compilerCandidate.get

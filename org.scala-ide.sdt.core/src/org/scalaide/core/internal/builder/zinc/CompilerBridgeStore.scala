@@ -121,14 +121,10 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
         cacheDir(installation).toFile.mkdirs()
         val targetJar = bridgeJar(installation)
         monitor.worked(1)
-        val sourceJars = scala.collection.mutable.MutableList(compilerBridge.toFile())
-
-        if (installation.isHydraInstallation)
-          sourceJars :+ installation.extraJars
 
         val label = installation.version.unparse
         val raw = new RawCompiler(scalaInstanceForInstallation(installation), ClasspathOptionsUtil.auto, log)
-        AnalyzingCompiler.compileSources(sourceJars, targetJar.toFile, List(zincInterface.toFile), label, raw, log)
+        AnalyzingCompiler.compileSources(List(compilerBridge.toFile), targetJar.toFile, List(zincInterface.toFile), label, raw, log)
 
         monitor.worked(1)
 
