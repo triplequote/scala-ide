@@ -31,7 +31,7 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   final val hydraReflectPrefix = "com.triplequote.scala-reflect"
   final val hydraCompilerPrefix = "com.triplequote.scala-compiler"
   final val hydraPrefix = "com.triplequote.hydra"
-  final val hydraBridgePrefix = "com.triplequote.hydra-bridge_1_0"
+  final val hydraBridgePrefix = "hydra-bridge_1_0"
   final val scalaLoggingPrefix = "com.typesafe.scala-logging.scala-logging_"
   final val scalaXmlPrefix = "org.scala-lang.modules.scala-xml_"
   final val logbackClassicPrefix = "ch.qos.logback.logback-classic"
