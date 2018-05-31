@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import scala.collection.mutable
 import scala.tools.nsc.Settings
+import scala.util.control.NonFatal
 
 import org.eclipse.core.resources.IContainer
 import org.eclipse.core.resources.IFile
@@ -29,7 +30,6 @@ import org.scalaide.util.internal.SbtUtils
 
 import sbt.internal.inc.Analysis
 import sbt.util.InterfaceUtil.problem
-import xsbti.CompileFailed
 import xsbti.Logger
 import xsbti.compile.CompileProgress
 import xsbti.compile.analysis.SourceInfo
@@ -46,7 +46,7 @@ import xsbti.compile.analysis.SourceInfo
  */
 class EclipseSbtBuildManager(val project: IScalaProject, settings: Settings, analysisCache: Option[IFile] = None,
   addToClasspath: Seq[IPath] = Seq.empty, srcOutputs: Seq[(IContainer, IContainer)] = Seq.empty)
-    extends EclipseBuildManager with HasLogger {
+  extends EclipseBuildManager with HasLogger {
 
   /** Initialized in `build`, used by the SbtProgress. */
   private var monitor: SubMonitor = _
@@ -87,8 +87,7 @@ class EclipseSbtBuildManager(val project: IScalaProject, settings: Settings, ana
           "compile",
           SbtUtils.NoPosition,
           "SBT builder crashed while compiling. The error message is '" + e.getMessage() + "'. Check Error Log for details.",
-          xsbti.Severity.Error
-        ))
+          xsbti.Severity.Error))
     } finally {
       ProductExposer.showJavaCompilationProducts(project.underlying)
     }
@@ -144,7 +143,7 @@ class EclipseSbtBuildManager(val project: IScalaProject, settings: Settings, ana
       try
         Some(aggressiveCompile(inputs, sbtLogger))
       catch {
-        case _: CompileFailed | CompilerBridgeFailed => None
+        case NonFatal(e) => throw e
       }
     analysis foreach setCached
     createAdditionalMarkers(analysis.getOrElse(latestAnalysis), progress.actualCompiledFiles)
@@ -197,7 +196,8 @@ class EclipseSbtBuildManager(val project: IScalaProject, settings: Settings, ana
    */
   override def buildErrors: Set[IMarker] = Set.empty
 
-  /** Inspired by IC.compile
+  /**
+   * Inspired by IC.compile
    *
    *  We need to duplicate IC.compile (by inlining insde this
    *  private method) because the Java interface it has as a
@@ -215,8 +215,7 @@ class EclipseSbtBuildManager(val project: IScalaProject, settings: Settings, ana
           "compile",
           SbtUtils.NoPosition,
           errors,
-          xsbti.Severity.Error
-        ))
+          xsbti.Severity.Error))
         throw CompilerBridgeFailed
     }
   }

@@ -114,8 +114,8 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
     val name = s"Compiling compiler-bridge for ${installation.version.unparse}"
     val monitor = SubMonitor.convert(pm, name, 2)
     monitor.subTask(name)
-
-    (compilerBridgeSrc(installation.version), zincFullJar) match {
+    val compilerBridgeSource = getCompilerBridgeSources(installation)
+    (compilerBridgeSource, zincFullJar) match {
       case (Some(compilerBridge), Some(zincInterface)) =>
         val log = new SbtLogger
         cacheDir(installation).toFile.mkdirs()
@@ -136,6 +136,13 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
       case _ =>
         monitor.worked(2)
         Left("Could not find compiler-bridge bundle")
+    }
+  }
+
+  private def getCompilerBridgeSources(scalaInstallation: IScalaInstallation) = synchronized {
+    scalaInstallation.extraJars.find(module => module.classJar.toString().contains("hydra-bridge")) match {
+      case Some(bridgeSource) => Some(bridgeSource.classJar)
+      case None => compilerBridgeSrc(scalaInstallation.version)
     }
   }
 
