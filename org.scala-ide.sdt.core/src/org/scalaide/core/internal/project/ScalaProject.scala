@@ -448,7 +448,7 @@ class ScalaProject private(val underlying: IProject) extends ClasspathManagement
       val rootProjectDir = underlying.getLocation().toFile().getAbsolutePath
 
       val hydraStore = if (hydraStoreUserSetting.isEmpty())
-            Paths.get(rootProjectDir, ".hydra", "scala-ide", underlying.getName).toString()
+            Paths.get(rootProjectDir, ".hydra", "eclispe", underlying.getName).toString()
           else
             Paths.get(rootProjectDir, hydraStoreUserSetting).toString()
 
@@ -460,7 +460,7 @@ class ScalaProject private(val underlying: IProject) extends ClasspathManagement
         else
           Paths.get(rootProjectDir, partitionFileUserSetting).toString()
 
-      val hydraTag = Paths.get(underlying.getName, "main").toString()
+      val hydraTag = s"${underlying.getName}/main"
       val hydraLogLocation = Paths.get(hydraStore, "hydra.log").toString()
 
       System.setProperty("hydra.logFile", hydraLogLocation)
