@@ -447,13 +447,14 @@ class ScalaProject private(val underlying: IProject) extends ClasspathManagement
       val sourcePartitionerUserSetting = storage.getString(convertNameToProperty(HydraSettings.sourcePartitioner.name))
       val rootProjectDir = underlying.getLocation().toFile().getAbsolutePath
 
+      val hydraDir = Paths.get(rootProjectDir, ".hydra", "eclipse")
       val hydraStore = if (hydraStoreUserSetting.isEmpty())
-            Paths.get(rootProjectDir, ".hydra", "eclispe", underlying.getName).toString()
+            hydraDir.resolve(underlying.getName).toString()
           else
             Paths.get(rootProjectDir, hydraStoreUserSetting).toString()
 
       val sourcepath = sourceFolders.map(_.toOSString).mkString(pathSeparator)
-      val timingsFile = Paths.get(hydraStore, "timings.csv").toString()
+      val timingsFile = hydraDir.resolve("timings.csv").toString()
 
       val partitionFile = if (partitionFileUserSetting.isEmpty())
           Paths.get(rootProjectDir, "src", "partition.hydra").toString()
