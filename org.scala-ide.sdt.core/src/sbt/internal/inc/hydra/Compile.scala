@@ -30,7 +30,7 @@ import sbt.internal.inc.SourceInfos
 
 /**
  * Copied the file from https://github.com/triplequote/hydra repository (v0.10.0 tag)
- * 
+ *
  * Helper methods for running incremental compilation.  All this is responsible for is
  * adapting any xsbti.AnalysisCallback into one compatible with the [[sbt.internal.inc.Incremental]] class.
  */

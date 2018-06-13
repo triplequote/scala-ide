@@ -79,7 +79,7 @@ class SbtInputs(
   def sources = sourceFiles.toArray
 
   def scalaInstallation = installation
-  
+
   private def srcOutDirs = (if (srcOutputs.nonEmpty) srcOutputs else project.sourceOutputFolders).map {
     case (src, out) => (Option(src.getLocation).map(_.toFile()), Option(out.getLocation).map(_.toFile()))
   }.collect {
