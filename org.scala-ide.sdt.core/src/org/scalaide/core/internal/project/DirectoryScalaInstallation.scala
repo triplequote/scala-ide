@@ -55,7 +55,7 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   }
 
   private def versionOfFileName(f: File): Option[String] = {
-    val versionedRegex = """.*scala-\w+-(2\.\d+(?:\.\d*)?(?:-.*)?).jar""".r
+    val versionedRegex = """.*scala-\w+(.2\.\d+(?:\.\d*)?(?:-.*)?).jar""".r
     f.getName() match {
       case versionedRegex(version) => Some(version)
       case _ => None
@@ -85,11 +85,11 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
    * @return A list of ScalaModule elements where class and source jars exist and start with the `prefix`
    */
   private def findScalaJars(prefixes: List[String], presumedVersion: Option[String]): List[ScalaModule] = {
-    presumedVersion foreach { s => require("""2\.\d+(?:\.\d*)?(?:-.*)?""".r.pattern.matcher(s).matches) }
+    presumedVersion foreach { s => require(""".2\.\d+(?:\.\d*)?(?:-.*)?""".r.pattern.matcher(s).matches) }
     // for now this means we return whatever we could find: it may not be enough (missing scala-reflect, etc)
 
     prefixes flatMap { p =>
-      val optionalVersion = """(?:.?\d\.\d+(?:\.\d*)?(?:-.*)?)?"""
+      val optionalVersion = """(?:.2\.\d+(?:\.\d*)?(?:-.*)?)?"""
       val requiredVersion = presumedVersion.fold(optionalVersion)(s => s.replaceAll("""\.""", """\\."""))
       val versionedString = s"$p$requiredVersion\\.jar"
       val versionedRegex = versionedString.r

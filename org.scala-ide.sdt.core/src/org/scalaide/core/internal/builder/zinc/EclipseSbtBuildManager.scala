@@ -30,6 +30,7 @@ import org.scalaide.util.internal.SbtUtils
 
 import sbt.internal.inc.Analysis
 import sbt.util.InterfaceUtil.problem
+import xsbti.CompileFailed
 import xsbti.Logger
 import xsbti.compile.CompileProgress
 import xsbti.compile.analysis.SourceInfo
@@ -143,7 +144,7 @@ class EclipseSbtBuildManager(val project: IScalaProject, settings: Settings, ana
       try
         Some(aggressiveCompile(inputs, sbtLogger))
       catch {
-        case NonFatal(e) => throw e
+        case _: CompileFailed | CompilerBridgeFailed => None
       }
     analysis foreach setCached
     createAdditionalMarkers(analysis.getOrElse(latestAnalysis), progress.actualCompiledFiles)
