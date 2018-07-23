@@ -38,6 +38,8 @@ import org.scalaide.ui.internal.preferences.ScalaPluginSettings
 import org.scalaide.util.eclipse.EclipseUtils
 import org.scalaide.util.internal.CompilerUtils
 import org.scalaide.util.internal.SettingConverterUtil
+import scala.tools.nsc.settings.SpecificScalaVersion
+import scala.tools.nsc.settings.{ Development, Final }
 
 /** The Scala classpath broken down in the JDK, Scala library and user library.
  *
@@ -525,12 +527,19 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
       s"Compiler plugin ${new Path(path).lastSegment()} is cross-compiled with incompatible version for this project: ${v.unparse} vs ${installation.version.unparse}",
       SdtConstants.ScalaVersionProblemMarkerId)
 
+    // Scala versions ending in `-hydraNN` are binary compatible with the corresponding final version so we just strip it
+    val installationVersion = installation.version match {
+      case ver @ SpecificScalaVersion(major, minor, rev, Development(str)) if str.startsWith("hydra") =>
+        ver.copy(build = Final)
+      case ver => ver
+    }
+
     plugins.foldLeft(List[ClasspathErrorMarker]()) {
       // plugins cross compiled with full Scala version
-      case (errors, p @ VersionInFile(version, true)) if version != installation.version ⇒
+      case (errors, p @ VersionInFile(version, true)) if version != installationVersion ⇒
         error(version, p) :: errors
       // plugins cross compiled with binary Scala version
-      case (errors, p @ VersionInFile(version, false)) if !CompilerUtils.isBinarySame(version, installation.version) ⇒
+      case (errors, p @ VersionInFile(version, false)) if !CompilerUtils.isBinarySame(version, installationVersion) ⇒
         error(version, p) :: errors
       case (errors, _) ⇒
         errors
