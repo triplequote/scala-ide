@@ -141,7 +141,7 @@ class DirectoryScalaInstallationTest {
     assertEquals("bad scala-compiler jar", basePath.append("scala-compiler_2.10.3-mixedCompatibleVersionsWithName.jar"), si.compiler.classJar)
     assertEquals("bad scala-compiler source jar", Some(basePath.append("scala-compiler-src_2.10.3-mixedCompatibleVersionsWithName.jar")), si.compiler.sourceJar)
 
-    def checkExtraJar(id: String, versionSuffix: String, jars: List[IScalaModule]) = {
+    def checkExtraJar(id: String, versionSuffix: String, jars: Seq[IScalaModule]) = {
       val path= basePath.append(s"scala-${id}${versionSuffix}.jar")
       val (goodJars, remainder) = jars.partition(_.classJar == path)
       assertFalse(s"Missing scala-$id jar", goodJars.isEmpty)
@@ -175,7 +175,7 @@ class DirectoryScalaInstallationTest {
 
     assertEquals("bad scala-compiler jar", basePath.append(s"scala-compiler${versionSuffix}.jar"), si.compiler.classJar)
 
-    def checkExtraJar(check: Boolean, id: String, jars: List[IScalaModule]) = {
+    def checkExtraJar(check: Boolean, id: String, jars: Seq[IScalaModule]) = {
       if (check) {
         val path= basePath.append(s"scala-${id}${versionSuffix}.jar")
         val (goodJars, remainder) = jars.partition(_.classJar == path)

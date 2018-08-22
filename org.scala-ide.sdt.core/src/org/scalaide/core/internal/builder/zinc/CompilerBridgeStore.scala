@@ -140,7 +140,7 @@ class CompilerBridgeStore(base: IPath, plugin: ScalaPlugin) extends HasLogger {
   }
 
   private def getCompilerBridgeSources(scalaInstallation: IScalaInstallation) = synchronized {
-    scalaInstallation.extraJars.find(module => module.classJar.toString().contains("hydra-bridge")) match {
+    scalaInstallation.allJars.find(module => module.classJar.toString().contains("hydra-bridge")) match {
       case Some(bridgeSource) => Some(bridgeSource.classJar)
       case None => compilerBridgeSrc(scalaInstallation.version)
     }

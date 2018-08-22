@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IPath
 import org.eclipse.core.runtime.Path
 import org.scalaide.core.internal.project.ScalaInstallation.extractVersion
 import org.scalaide.util.internal.CompilerUtils.isBinarySame
+import scala.collection.mutable.ListBuffer
 
 /**
  * This class tries to collect a valid scala installation (library, compiler jars) from a directory.
@@ -132,26 +133,46 @@ class DirectoryScalaInstallation(val directory: IPath) extends ScalaInstallation
   if (versionCandidate.isDefined && versionCandidate.get < ScalaVersion("2.10.0")) throw new IllegalArgumentException("This Scala version is too old for the presentation compiler to use. Please provide a 2.10 scala (or later).")
   // Hydra initialization checks
   if (isHydraInstallation) {
-    if (extraJars.filter(module => module.classJar.toFile().getName.contains(hydraBridgePrefix)).isEmpty)
+    if (allJars.filter(module => module.classJar.toFile().getName.contains(hydraBridgePrefix)).isEmpty)
       throw new IllegalArgumentException("Can not recognize a valid Hydra Bridge jar in this directory.")
-    if (extraJars.filter(module => module.classJar.toFile().getName.contains(hydraPrefix)).isEmpty)
+    if (allJars.filter(module => module.classJar.toFile().getName.contains(hydraPrefix)).isEmpty)
       throw new IllegalArgumentException("Can not recognize a valid Hydra jar in this directory.")
-    if (extraJars.filter(module => module.classJar.toFile().getName.contains(hydraLicenseCheckingPrefix)).isEmpty)
+    if (allJars.filter(module => module.classJar.toFile().getName.contains(hydraLicenseCheckingPrefix)).isEmpty)
       throw new IllegalArgumentException("Can not recognize a valid Hydra License Checking jar in this directory.")
-    if (extraJars.filter(module => module.classJar.toFile().getName.contains(license4jPrefix)).isEmpty)
+    if (allJars.filter(module => module.classJar.toFile().getName.contains(license4jPrefix)).isEmpty)
       throw new IllegalArgumentException("Can not recognize a valid License4j jar in this directory.")
-    if (extraJars.filter(module => module.classJar.toFile().getName.contains(hydraDashboardPrefix)).isEmpty)
+    if (allJars.filter(module => module.classJar.toFile().getName.contains(hydraDashboardPrefix)).isEmpty)
       throw new IllegalArgumentException("Can not recognize a valid Hydra Dashboard jar in this directory.")
   }
 
-  override lazy val extraJars = findScalaJars(List(
+  private lazy val vanillaScalaExtraJars: List[ScalaModule] = findScalaJars(List(
     scalaReflectPrefix,
-    scalaSwingPrefix, hydraPrefix, hydraBridgePrefix, scalaLoggingPrefix,
-    logbackClassicPrefix, logbackCorePrefix, slf4jPrefix,
-    hydraReflectPrefix, scalaXmlPrefix, license4jPrefix,
-    hydraDashboardPrefix, hydraLicenseCheckingPrefix), presumedLibraryVersionString).filter {
+    scalaSwingPrefix,
+    scalaXmlPrefix
+  ), presumedLibraryVersionString).filter {
     module => versionCandidate forall (looksBinaryCompatible(_, module))
   }
+
+
+  lazy val hydraJars: List[ScalaModule] = (extantJars.map { allJars =>
+    val jars = ListBuffer.empty[File]
+    val vanillaFiles: Set[File] = (for (module <- vanillaScalaExtraJars) yield {
+      module.sourceJar.toSeq.map(_.toFile()) :+ module.classJar.toFile()
+    }).flatten.toSet
+
+    for (f <- extantJars.getOrElse(Array[File]()) if !vanillaFiles(f))
+      jars += f
+
+    jars.toList
+  }).getOrElse(List()).map(jar => ScalaModule(new Path(jar.getCanonicalPath), None))
+
+  override lazy val extraJars = if (isHydraInstallation)
+    vanillaScalaExtraJars ++ hydraJars
+  else
+    vanillaScalaExtraJars
+
+  override lazy val allJars: Seq[ScalaModule] = library +: compiler +: (extraJars ++ hydraJars)
+
   override lazy val compiler = compilerCandidate.get
   override lazy val library = libraryCandidate.get
   //If Hydra is used the version must be retrieved from the compiler jar
