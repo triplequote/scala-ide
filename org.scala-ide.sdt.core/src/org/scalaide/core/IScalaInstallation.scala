@@ -56,6 +56,10 @@ trait IScalaInstallation {
    * Are the registered components of this installation available on the file system ?
    */
   def isValid(): Boolean
+  /**
+   * Returns if the project should be compiled with Hydra Compiler
+   */
+  def isHydraInstallation: Boolean = version.unparse.contains("hydra")
 }
 
 

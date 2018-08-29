@@ -338,7 +338,7 @@ object ScalaInstallation {
   val LibraryPropertiesPath = "library.properties"
 
   def labelInFile(scalaPath: IPath): Option[String] = {
-    val scalaJarRegex = """scala-(\w+)(?:.2\.\d+(?:\.\d*)?(?:-.*)?)?.jar""".r
+    val scalaJarRegex = """.*scala-(\w+)(?:.2\.\d+(?:\.\d*)?(?:-.*)?)?.jar""".r
     scalaPath.toFile().getName() match {
       case scalaJarRegex(qualifier) => Some(qualifier + ".properties")
       case _ => None

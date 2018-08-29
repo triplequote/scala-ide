@@ -84,7 +84,8 @@ object LabeledScalaInstallationsSaveHelper {
       override def compiler = compilerMod
       override def library = libraryMod
       override def extraJars = extraJarsMods
-      override def version = ScalaInstallation.extractVersion(library.classJar).getOrElse(NoScalaVersion)
+      override def version = if (compiler.classJar.toFile().getName.contains("hydra")) ScalaInstallation.extractVersion(compiler.classJar).getOrElse(NoScalaVersion)
+        else ScalaInstallation.extractVersion(library.classJar).getOrElse(NoScalaVersion)
     }
   }
 

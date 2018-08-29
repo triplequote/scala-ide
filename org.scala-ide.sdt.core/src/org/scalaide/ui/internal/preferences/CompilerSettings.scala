@@ -150,8 +150,13 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
   def getPageId = SdtConstants.PluginId
 
   import EclipseSetting.toEclipseBox
+
+  /** Hydra Settings */
+  lazy val hydraScalaInstallations = ScalaInstallation.availableInstallations.filter(installation => installation.isHydraInstallation)
+  lazy val hydraBoxes = if (hydraScalaInstallations.nonEmpty) IDESettings.hydraSettings else List.empty
+
   /** The settings we can change */
-  lazy val userBoxes = IDESettings.shownSettings(ScalaPresentationCompiler.defaultScalaSettings()) ++ IDESettings.buildManagerSettings :+
+  lazy val userBoxes = IDESettings.shownSettings(ScalaPresentationCompiler.defaultScalaSettings()) ++ IDESettings.buildManagerSettings ++ hydraBoxes :+
     ScopesSettings.buildScopesSettings(this.getConcernedProject())
   lazy val eclipseBoxes = userBoxes.map { s => toEclipseBox(s, preferenceStore0) }
 

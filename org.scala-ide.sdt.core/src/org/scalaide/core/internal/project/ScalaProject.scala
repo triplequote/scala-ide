@@ -60,6 +60,8 @@ import org.scalaide.util.eclipse.EclipseUtils
 import org.scalaide.util.eclipse.FileUtils
 import org.scalaide.util.eclipse.SWTUtils
 import org.scalaide.util.internal.SettingConverterUtil
+import java.nio.file.Paths
+import org.scalaide.ui.internal.preferences.HydraSettings
 
 object ScalaProject {
   def apply(underlying: IProject): ScalaProject = {
@@ -430,7 +432,52 @@ class ScalaProject private(val underlying: IProject) extends ClasspathManagement
       (classpathSettings ++ userSettings) map (_.unparse)
     }
     val extraArgs = defaultScalaSettings().splitParams(storage.getString(CompilerSettings.ADDITIONAL_PARAMS))
-    shownArgs.flatten ++ encArgs ++ extraArgs
+    val hydraArgs = hydraCompilerSettings()
+    shownArgs.flatten ++ encArgs ++ extraArgs ++ hydraArgs
+  }
+
+  private def hydraCompilerSettings() = {
+    import org.scalaide.util.internal.SettingConverterUtil.convertNameToProperty
+    val hydraArguments = scala.collection.mutable.ArrayBuffer.empty[String]
+
+    if (effectiveScalaInstallation().isHydraInstallation) {
+      val hydraStoreUserSetting = storage.getString(convertNameToProperty(HydraSettings.hydraStore.name))
+      val cpusUserSetting = storage.getString(convertNameToProperty(HydraSettings.cpus.name))
+      val partitionFileUserSetting = storage.getString(convertNameToProperty(HydraSettings.partitionFile.name))
+      val sourcePartitionerUserSetting = storage.getString(convertNameToProperty(HydraSettings.sourcePartitioner.name))
+      val rootProjectDir = underlying.getLocation().toFile().getAbsolutePath
+
+      val hydraDir = Paths.get(rootProjectDir, ".hydra", "eclipse")
+      val hydraStore = if (hydraStoreUserSetting.isEmpty())
+            hydraDir.resolve(underlying.getName).toString()
+          else
+            Paths.get(rootProjectDir, hydraStoreUserSetting).toString()
+
+      val sourcepath = sourceFolders.map(_.toOSString).mkString(pathSeparator)
+      val timingsFile = hydraDir.resolve("timings.csv").toString()
+
+      val partitionFile = if (partitionFileUserSetting.isEmpty())
+          Paths.get(rootProjectDir, "src", "partition.hydra").toString()
+        else
+          Paths.get(rootProjectDir, partitionFileUserSetting).toString()
+
+      val hydraTag = s"${underlying.getName}/main"
+      val hydraLogLocation = Paths.get(hydraStore, "hydra.log").toString()
+
+      System.setProperty("hydra.logFile", hydraLogLocation)
+
+      val argumentsMap = Map("-cpus" -> cpusUserSetting, "-sourcepath" -> sourcepath, "-YhydraStore" -> hydraStore, "-YpartitionFile" -> partitionFile, "-YrootDirectory" -> rootProjectDir,
+          "-YhydraTag" -> hydraTag, "-YtimingsFile" -> timingsFile)
+
+      argumentsMap.foreach(f => {
+        hydraArguments += f._1
+        hydraArguments += f._2
+      })
+
+      hydraArguments += "-YsourcePartitioner:" + sourcePartitionerUserSetting
+    }
+
+    hydraArguments.toArray
   }
 
   private def prepareCompilerSettings(): Settings = {
